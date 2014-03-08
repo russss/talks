@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Electromagnetic Field</title>
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="../reveal.js/css/reveal.min.css">
+		<link rel="stylesheet" href="../reveal.js/css/theme/emf.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="../reveal.js/lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="../reveal.js/css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="../reveal.js/lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section class="title-slide" data-state="title">
+          <h1>Electromagnetic Field</h1>
+          <h4>Tales from the UK's first large-scale hacker camp.</h4>
+          <p><small>Russ Garrett &mdash; @russss</small></p>
+          <aside class="notes">
+          Hi, I'm Russ. Today I'm going to show you some of my holiday snaps from last summer.
+          </aside>
+				</section>
+        <section data-image="images/start.jpg">
+          <aside class="notes">
+          <p>Well, OK, it's a little more complex than that. My holidays don't tend to be very relaxing.
+              And some of my slides are graphs because I love graphs.</p>
+
+           <p>Back in 2010 my friend Jonty and I decided that running
+           London Hackspace wasn't really taking up enough of our spare time.</p>
+
+           <p>On the continent they have a tradition of running these hacker camps -
+           in Germany they have the Chaos Communication Camp, and the Dutch run a
+           similar event which they enjoy changing the name of to confuse you.
+           The next Dutch event is in July and they're putting 3,500 people in a field for a
+           week.</p>
+           </aside>
+        </section>
+        <section data-image="images/campsite.jpg">
+        <aside class="notes">
+           <p>Anyway, we decided that we didn't want to let the Europeans have
+           all the fun. So, having never been to any of these things, we decided
+           to give it a go in the UK.</p>
+
+           <p>So, after a couple of pints in the pub, we decided on an appropriately pun-laden
+                name and Electromagnetic Field was born.</p>
+
+            <p>So, what's the point of a hacker camp?
+            It's a cross between a music festival and a tech conference.
+            </p>
+           </aside>
+           </section>
+         <section data-image="images/tent.jpg">
+            <aside class="notes">
+            <p>
+            A load of geeks in a field for a weekend with talks, a ridiculously fast
+            internet connection, power to the tent, and most importantly booze.</p>
+
+           <p>And above everything else this is an entirely non-profit thing.</p>
+
+            <p>Of course, we didn't have much experience running festivals,
+                but how hard could it be?</p>
+           </aside>
+        </section>
+        <section data-image="images/site.jpg">
+          <h1>The Site</h1>
+          <aside class="notes">
+            <p>Well, it seems that the things you think are going to
+            be easy end up being the hardest bits.</p>
+
+            <p>In about March of last year we finally decided on a site - a park just
+            outside Milton Keynes. It was pretty well-priced, and the people who
+            own the parks seemed pretty cool.</p>
+
+            <p>And in this picture it looks pretty idyllic, doesn't it?</p>
+          </aside>
+        </section>
+        <section data-image="images/map.png">
+           <aside class="notes">
+           <p>Well, here's the aerial photo and 
+                the first thing to note is the excellent transport links...namely the M1 there.
+                Going right through the site. So it was a little bit noisy.</p>
+
+               <p>The next thing to note is the sewage works just to the south.
+               Thankfully the wind was blowing from the north for the whole event,
+               because 
+               </p>
+
+              <p>And lastly, that little stream running through
+              the middle. That's actually the output of the largest system
+              of artificial flood-control lakes in Europe, and I hear they're
+              not afraid to use it. The park floods for 15 days a year.</p>
+
+              <p>As you may remember, last summer wasn't the driest on record.
+              I got a bit worried so I wrote a scraper for the river level data
+              on the Environment Agency website...</p>
+          </aside>
+        </section>
+        <section data-image="images/river-level.png">
+        <aside class="notes">
+            <p>I told you there'd be graphs.</p>
+            <p>The red area there is the flooding level, and the line is when we ran EMF.</p>
+            <p>Anyway...</p>
+            </aside>
+        </section>
+        <section data-image="images/mast.jpg">
+        <h1>Networking</h1>
+           <aside class="notes">
+           <p>One of the main things that people noticed at EMF was that we had
+           rock solid, immensely fast wifi, which is something a lot of conferences
+           seem to have trouble with.</p>
+
+           <p>Much of this can be attributed to having a significant proportion of
+           the UK internet industry on our team. If you want an amazing internet
+           connection, you really want the EMF network team on your side...</p>
+           </aside>
+        </section>
+        <section data-image="images/mast-up.jpg">
+          <aside class="notes">
+            <p>This is one of the masts we used - it goes up to 30m high and the
+            other one sat in the car park of a datacenter a few miles away.</p>
+
+            <p>Once this was finally set up, we were seeing about 380 megabits
+                symmetrical bandwidth on the wireless link, which wasn't bad.</p>
+            <p>Anyway, once everything was up and running it looked a bit like this:</p>
+          </aside>
+        </section>
+        <section data-image="images/network-1.png">
+          <aside class="notes">
+            <p>I'm not sure how much of that you can read...</p>
+            <p>This setup still astounds me, really. There are datacenters which have
+            a worse connectivity than this field did.</p>
+            <p></p>
+            <p>And that's just the connectvity.</p>
+          </aside>
+        </section>
+        <section data-image="images/network-2.png">
+          <aside class="notes">
+            <p>This lot is </p>
+          </aside>
+        </section>
+        <section data-image="images/datenklo.jpg"></section>
+        <section>
+            <img src="images/wireless.png">
+            <img src="images/leases.png">
+        </section>
+        <section>
+            <img src="images/bandwidth.png">
+        </section>
+        <section data-image="images/moar-bandwidth.jpg"></section>
+        <section data-image="images/tilda.jpg">
+
+        </section>
+        <section data-image="images/bar.jpg"></section>
+        <section data-image="images/bar-2.jpg"></section>
+        <section data-image="images/beersales.png"></section>
+        <section data-image="images/aerial-day.jpg">
+           <aside class="notes">
+            <p>So, it turns out this talk is actually a bit of a sales pitch</p>
+           </aside>
+        </section>
+        <section data-image="images/aerial-night.jpg">
+            <p>So, it turns out this talk is actually a bit of a sales pitch</p>
+        </section>
+        <section data-image="images/end.jpg" class="shadow">
+        <h2>EMF: Late Summer 2014</h2>
+        <h3><a href="http://www.emfcamp.org">https://www.emfcamp.org</a></h3>
+        <h3><a href="http://www.twitter.com/emfcamp">@emfcamp</a></h3>
+        <h3><a href="http://www.twitter.com/russss">@russss</a></h3>
+          <h4>Photo credits:</h4>
+          <ul class="credits">
+            <li><a href="http://www.flickr.com/photos/russss">http://www.flickr.com/photos/russss</a></li>
+            <li><a href="http://www.flickr.com/photos/chaoticeunoia">http://www.flickr.com/photos/chaoticeunoia</a></li>
+            <li><a href="http://www.flickr.com/photos/nottinghack">http://www.flickr.com/photos/nottinghack</a></li>
+          </ul>
+				</section>
+			</div>
+
+		</div>
+
+		<script src="../reveal.js/lib/js/head.min.js"></script>
+		<script src="../reveal.js/js/reveal.min.js"></script>
+
+		<script>
+
+
+        Reveal.addEventListener( 'slidechanged', function( event ) {
+          var stateBg = document.querySelector('.state-background');
+          var image = event.currentSlide.getAttribute('data-image');
+
+          if (image) {
+            stateBg.style.backgroundImage = 'url('+image+')';
+            stateBg.style.backgroundColor = 'black';
+            event.currentSlide.className = event.currentSlide.className + " bgimage"
+          } else {
+            stateBg.style.backgroundImage = '';
+            stateBg.style.backgroundColor = '';
+          }
+        });
+
+
+			Reveal.initialize({
+				controls: false,
+				progress: true,
+				history: true,
+				center: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: '../reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: '../reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '../reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '../reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: '../reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: '../reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+
+		</script>
+
+	</body>
+</html>

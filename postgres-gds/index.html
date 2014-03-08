@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Postgres: The Nice Bits</title>
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="../reveal.js/css/reveal.min.css">
+		<link rel="stylesheet" href="../reveal.js/css/theme/russ.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="../reveal.js/lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+		<script>
+			if( window.location.search.match( /print-pdf/gi ) ) {
+				var link = document.createElement( 'link' );
+				link.rel = 'stylesheet';
+				link.type = 'text/css';
+				link.href = 'css/print/pdf.css';
+				document.getElementsByTagName( 'head' )[0].appendChild( link );
+			}
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="../reveal.js/lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+		<div class="reveal">
+      <div class="slides">
+        <section><h1>Postgres:</h1><h1>The Nice Bits</h1>
+        <aside class="notes">
+          First thing: Schemas aren't a bad thing.
+        </aside>
+        </section>
+<section>
+<h2>Schemas are great</h2>
+
+<pre><code data-trim>
+ALTER TABLE accounts ADD CONSTRAINT positive_balance
+                     CHECK (balance &gt;= 0);
+</code></pre>
+
+<aside class="notes">
+<ul>
+  <li>It's really useful to have a database which can help you enforce constraints on your data.
+  <li>This is just the tip of the iceberg - Postgres has rather comprehensive type system as well.
+  <li>Lots of people suffer because they assume their ORM will enforce integrity, and then they wonder why they have, say, three users with the same name.
+  <li>Schemas also help you think about structuring your data before you start throwing it in a DB
+  <li>But you never get the schema right first time.
+  <li>And a big reason why people hate relational databases is...
+</ul>
+</aside>
+</section>
+
+<section>
+<h2>Schema changes often aren't great</h2>
+
+<pre><code data-trim>
+  mysql&gt; ALTER TABLE widgets ADD COLUMN size INTEGER;
+</code></pre>
+
+<br><br>
+<p>&hellip;</p>
+
+<aside class="notes">
+<ul>
+  <li>A lot of people have seen this.
+  <li>You've just done a deployment, you're sitting back, and then the site dies.
+  <li>Every schema change in MySQL locks the entire table until it's finished!
+  <li>(I spent five minutes trying to find a machine running MySQL so I could work out what the prompt looked like)
+  <li>Thankfully, Postgres is a lot better than this.
+</ul>
+</aside>
+</section><section>
+<h2>Zero-downtime schema changes</h2>
+
+<p>In Postgres, all<small>*</small> schema changes are transactional.</p>
+<p>Some schema changes are O(1):</p>
+
+<ul>
+<li>Adding a nullable column without a default</li>
+<li>Dropping a column</li>
+<li>Some trivial column type changes</li>
+<li><small>(*)</small> CREATE INDEX CONCURRENTLY</li>
+</ul>
+<aside class="notes">
+<p>Postgres gives us a lot of tools for avoiding this pain.</p>
+<p>As long as you're not setting defaults, you can add and remove columns instantly</p>
+<p>You can change the type of a column, say from a VARCHAR to a TEXT, instantly</p>
+<p>So if you want to add a column in Postgres, you'd usually do something like this...</p>
+</aside>
+</section>
+<section>
+<h2>The usual scenario</h2>
+
+<pre><code data-trim>
+  ALTER TABLE widgets ADD COLUMN size INTEGER DEFAULT 0 NOT NULL;
+</code></pre>
+
+<p>Blocks writes to the table until it's set the default on all rows.</p>
+
+<aside class="notes">
+<p>This is going to cause you the same problem as in MySQL. All the writes to the table will have to wait until
+Postgres has made sure all of the rows have a size of zero. Thankfully we have a better way...</p>
+</aside>
+</section><section>
+<h2>Zero-downtime changes</h2>
+
+<pre><code data-trim>
+ALTER TABLE widgets ADD COLUMN size INTEGER;
+ALTER TABLE widgets ALTER COLUMN size DEFAULT 0;
+UPDATE widgets SET size = 0;
+ALTER TABLE widgets ALTER COLUMN size NOT NULL;
+</code></pre>
+
+<p>All these statements are O(1), except the UPDATE which doesn't block writes.</p>
+<aside class="notes">
+<p>So now we've made it a bit more fiddly, but <em>none</em> of these of these statements block writes on your
+table for more than an instant, regardless of how big the table is.</p>
+<p>This is a fairly simple example. In trickier cases you might need trigger or more application code to keep data up to date</p>
+</aside>
+</section><section>
+<h2>Zero-downtime changes</h2>
+
+<p>Completely decouple schema changes from deploys:</p>
+
+<ol>
+  <li>Add the column
+  <li>Populate the values
+  <li>Add constraints
+  <li>Deploy code which relies on it
+  <li>Drop old columns
+</ol>
+
+<aside class="notes">
+<p>But with a little bit of thought, you can (and should) completely decouple your schema changes from deploys.</p>
+</aside>
+</section><section>
+<h1>Schemaless</h1>
+
+<aside class="notes">
+<ul>
+  <li>Sometimes fixed schemas are a pain
+  <li>This is where Postgres is great because it lets you mix schemaless data in
+</ul>
+</aside>
+</section><section>
+<h2>Schemaless column types</h2>
+
+<ul>
+  <li>hstore (since years ago)</li>
+  <li>XML (since 8.3)</li>
+  <li>json (complete support in 9.3)</li>
+</ul>
+<aside class="notes">
+<ul>
+  <li>In fact Postgres has a number of schemaless types
+  <li>hstore is probably the most complete, and at the moment it's the most efficient, but it's a little bit weird
+  <li>I hope you never have to use the XML type (but I have)
+  <li>json is quickly catching up - feature-equivalent with hstore and already pretty fast
+</ul>
+</aside>
+</section><section>
+<h2>Schemaless: JSON</h2>
+
+<pre><code data-trim>
+CREATE TABLE articles (
+  id SERIAL NOT NULL PRIMARY KEY,
+  slug TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  data JSON
+);
+
+INSERT INTO articles (slug, name, data) VALUES
+  ('cats', 'Cats', '{"body": "&hellip;",
+                     "type": "post",
+                     "keywords": ["cat", "mammal"]
+                    }'
+  );
+</code></pre>
+
+</section><section>
+<h2>Querying JSON</h2>
+
+<pre><code data-trim>
+SELECT name FROM articles WHERE data-&gt;&gt;'type' = 'post';
+</code></pre>
+
+<pre><code data-trim>
+SELECT data-&gt;&gt;'keywords'-&gt;&gt;0 FROM articles;
+</code></pre>
+
+</section><section>
+<h2>Indexing JSON fields</h2>
+
+<pre><code data-trim>
+CREATE INDEX articles_data ON articles USING GIN(data);
+</code></pre>
+
+<p>or</p>
+
+<pre><code data-trim>
+CREATE INDEX articles_type ON articles(data-&gt;&gt;'type');
+</code></pre>
+
+</section><section>
+<h1>Code in the database</h1>
+
+</section><section>
+<h2>Stored procedure languages</h2>
+
+<p>Included: pgSQL, TCL, Perl, Python</p>
+
+<p>Extensions: Javascript, Ruby, Scheme, Java (!), PHP (‽), ...</p>
+
+</section><section>
+<h2>Everyone loves Javascript</h2>
+
+<pre><code data-trim>
+CREATE TABLE ratings (id int, count int, total int, average float);
+
+CREATE FUNCTION add_rating(id int, rating int)
+ RETURNS float AS
+$$
+ var data = plv8.execute("SELECT count, total, average FROM ratings
+                          WHERE id = $1", [id])[0];
+ var newTotal = data.total + rating;
+ var newCount = data.count + 1;
+ var newAverage = (newTotal / newCount);
+ plv8.execute("UPDATE ratings SET count = $1, total = $2, average = $3
+               WHERE id = $4",
+ [newCount, newTotal, newAverage, id]);
+ return newAverage;
+$$
+LANGUAGE plv8;
+</code></pre>
+
+</section><section>
+<h2>Example</h2>
+
+<pre><code data-trim>
+INSERT INTO ratings VALUES (1, 0, 0, 0);
+</code></pre>
+<pre><code data-trim>
+SELECT add_rating(1, 5);
+</code></pre>
+<pre>
+ add_rating
+------------
+ 5
+</pre>
+<pre><code data-trim>
+SELECT add_rating(1, 4);
+</code></pre>
+<pre>
+ add_rating
+------------
+ 4.5
+</pre>
+
+</section><section>
+<h1>Backups</h1>
+
+</section><section>
+<h2>Backups: log replication</h2>
+
+<ul>
+  <li>Based on Postgres's write-ahead logs (WAL)
+  <li>Automated, hassle-free incremental backups
+  <li>Lock-free, concurrent base backups
+  <li>Always less than 5 minutes old
+</ul>
+
+</section><section>
+<h2>WAL archiving: WAL-E</h2>
+
+<ul>
+<li>Automates base backups
+<li>Saves log segments to S3 or other block stores
+<li>Compresses (LZO) and encrypts (GPG)
+<li>Automates segment retrieval
+</ul>
+</section><section>
+<h2>Point-in-time recovery</h2>
+
+<p>Someone accidentally ran an UPDATE without a WHERE clause at 17:21:30...</p>
+
+<pre><code data-trim>
+restore_command = 'envdir /etc/wal-e.d/env wal-e wal-fetch "%f" "%p"'
+recovery_target_time = '2014-03-01 17:21:29 UTC'
+</code></pre>
+
+</section><section>
+<h2>Streaming replication &amp; hot standby</h2>
+
+<p>Slave servers connect back to the master and receive changes live</p>
+
+</section><section>
+<h2>Synchronous replication</h2>
+
+<pre><code data-trim>
+synchronous_standby_names = 'slave1 slave2'
+</code></pre>
+
+<p>Postgres waits for at least one of the slaves to write the transaction to disk before completing a commit</p>
+
+</section><section>
+<h2>Sharding and clustering</h2>
+
+<ul>
+  <li>err.
+</ul>
+<aside class="notes">
+<ul>
+</ul>
+</aside>
+</section><section>
+<h2>GIS and such</h2>
+
+PostGIS is great, but it's a bit weird.
+
+</section><section>
+<h2>Creating a GIS table</h2>
+
+<pre><code data-trim>
+CREATE TABLE tube_stations (
+    id SERIAL NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL
+);
+SELECT AddGeometryColumn('tube_stations', 'geom', 4326, 'POINT', 2);
+</code></pre>
+
+</section><section>
+  <h2>Add some rows</h2>
+
+<pre><code data-trim>
+INSERT INTO tube_stations(name, geom) VALUES
+    ('Holborn', ST_GeomFromText('POINT(-0.1200 51.5174)', 4326));
+INSERT INTO tube_stations(name, geom) VALUES
+    ('Old Street', ST_GeomFromText('POINT(0.0873 51.5263)', 4326));
+</code></pre>
+
+</section><section>
+<h2>Adding an index</h2>
+
+<pre><code data-trim>
+  CREATE INDEX tube_stations_geom_gist ON tube_stations
+                          USING GIST (geom);
+</code></pre>
+
+</section><section>
+<h2>Querying with the index</h2>
+
+<pre><code data-trim>
+SELECT name FROM tube_stations WHERE
+    geom &amp;&amp; SetSRID('BOX(-0.121 51.512, -0.097 51.524)'::box2d, 4326);
+</code></pre>
+<pre>
+     name
+---------------
+ Holborn
+ Barbican
+ Blackfriars
+ Chancery Lane
+ Farringdon
+ Holborn
+ St. Paul's
+</pre>
+
+</section><section>
+<h2>End</h2>
+
+<ul>
+  <li><a href="http://russ.garrett.co.uk/talks/postgres-gds">http://russ.garrett.co.uk/talks/postgres-gds</a>
+  <li>Twitter: <a href="http://twitter.com/russss">@russss</a></li>
+</ul>
+<br>
+<br>
+<p><small>Some examples stolen with permission from <a href="http://twitter.com/andrewgodwin">Andrew Godwin</a><br>
+  (<a href="http://vimeo.com/83756644">Rapid Schema Development with Postgres</a> at AYB13)</small></p>
+
+</section>
+			</div>
+		</div>
+
+		<script src="../reveal.js/lib/js/head.min.js"></script>
+		<script src="../reveal.js/js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: false,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'none', // default/cube/page/concave/zoom/linear/fade/none
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: '../reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: '../reveal.js/plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '../reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: '../reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: '../reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: '../reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
